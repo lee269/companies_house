@@ -2,13 +2,16 @@ Sys.setenv(http_proxy="http://10.85.4.54:8080", https_proxy="https://10.85.4.54:
 
 library(here)
 library(companieshr)
+library(CompaniesHouse)
+library(purrr)
 
-x <- readRDS("~/Documents/companies_house_keys.rds")
+x <- readRDS(here("keys", "companies_house_keys.rds"))
 key <- x[1,2]
 
 
-x <- companies_house_collect(companies = "00445790", auth_api_key = key) 
-z <- x$results_df
+z <- CompanySearch("Unilever", mkey = key)
 
+cos <- unique(as.vector(z$company.number))
 
-z1 <- CompanySearch("Tesco", mkey = key)
+CompanyNetwork(cos, mkey = key, YEAR = 2018)
+
