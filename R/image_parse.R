@@ -2,7 +2,11 @@
 
 library(reticulate)
 library(dplyr)
-reticulate::use_python(python = '/Library/Frameworks/Python.framework/Versions/3.7/bin/python3', required = TRUE)
+
+# for SCE build
+reticulate::use_python("/usr/bin/python3.6", required = TRUE)
+# for home computer
+# reticulate::use_python(python = '/Library/Frameworks/Python.framework/Versions/3.7/bin/python3', required = TRUE)
 
 source(here::here("R", "documents.R"))
 # source_python(here::here("python", "xbrl_parser.py"))

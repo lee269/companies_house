@@ -1,3 +1,5 @@
+Sys.setenv(http_proxy="http://10.85.4.54:8080", https_proxy="https://10.85.4.54:8080")
+
 library(pdftools)
 library(here)
 library(purrr)
@@ -19,23 +21,10 @@ pdf_to_png <- function(file){
 ocr_pdf <- function(file){
 x <- magick::image_read_pdf(file) %>% 
      magick::image_convert(colorspace = "gray") %>% 
-     magick::image_deskew() %>% 
+     # magick::image_deskew() %>% 
      magick::image_trim() %>% 
      magick::image_ocr_data()
 return(x)
 }
 
-pdf <- here::here("data", "meatsnacks4.pdf")
-meta <- pdf_info(here::here("data", "meatsnacks4.pdf"))
-
-pages <- meta$pages
-pdf_to_png(here::here("data", "meatsnacks1.pdf"))
-
-magick::image_read(here::here("data", "meatsnacks1_15.png")) %>% 
-  magick::image_convert(colorspace = "gray") %>% 
-  magick::image_trim %>% 
-  magick::image_deskew() %>% 
-  magick::image
-
-?tesseract::ocr_data()
 
