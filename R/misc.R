@@ -7,24 +7,25 @@ source(here::here("R", "documents.R"))
 
 key <- readRDS(here::here("keys", "companies_house_keys.rds")) %>% .[1,2] %>% as.character()
 
-filings <- get_filings("07955170", key)
+tesco <- "00445790"
+moss <- "07955170"
+meatsnacks <- "06242292"
 
-aa <- filings %>% filter(type == "AA") %>% select(links.document_metadata)
-url <- aa[1, 1]
+filings <- get_filings(moss, key, category = "accounts", items_per_page = "50")
 
-has_xbrl(url)
+url <- filings$links.document_metadata[1]
 
-get_document(url, key, type = "pdf", filename = here::here("data", "test.pdf"))
 
-pdf <- here::here("data", "test.pdf")
-meta <- pdftools::pdf_info(here::here("data", "test.pdf"))
+has_xbrl(url, key)
 
-x <- magick::image_read_pdf(pdf) %>% magick::image_ocr_data()
-  magick::image_convert(colorspace = "gray") %>% 
-  magick::image_trim() %>% 
-  # magick::image_deskew() %>% 
-  magick::image_ocr()
+get_document(url, key, type = "pdf", filename = here::here("data", "moss.pdf"))
+pdf <- here::here("data", "moss.pdf")
 
-?tesseract::ocr_data()
+x <- magick::image_read_pdf(pdf) %>%
+      magick::image_ocr(HOCR = TRUE) %>%
+      purrr::map(hocr::hocr_parse) %>%
+      purrr::map(hocr::tidy_tesseract) %>% 
+      bind_rows()
 
-z <- ocr_pdf(pdf)
+z <- x %>% group_by(ocr_page_id, ocr_par_id, ocr_line_id) %>% summarise(line = paste(ocrx_word_value, collapse = " "))
+

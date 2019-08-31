@@ -1,10 +1,22 @@
 # Documents: https://forum.aws.chdev.org/t/cant-access-documents-from-amazons3-server/1871
-Sys.setenv(http_proxy="http://10.85.4.54:8080", https_proxy="https://10.85.4.54:8080")
+# Sys.setenv(http_proxy="http://10.85.4.54:8080", https_proxy="https://10.85.4.54:8080")
 
 # retrieve filing history table for a company
-get_filings <- function(company_number, key){
+get_filings <- function(company_number, key, category = NULL, items_per_page = NULL){
+    params <- NULL
     baseurl <- "https://api.companieshouse.gov.uk/company/"
     url <- paste0(baseurl, company_number, "/filing-history")
+    
+    if(length(c(category, items_per_page)) == 2){
+      params <- paste0("?", "category=", category, "&", "items_per_page=", items_per_page)
+    }
+    
+    if(length(c(category, items_per_page)) == 1){
+      if(!is.null(category)) params <- paste0("?", "category=", category)
+      if(!is.null(items_per_page)) params <- paste0("?", "items_per_page=", items_per_page)
+    }
+    
+    url <- paste0(url, params)
     
     result <- httr::GET(url, httr::authenticate(key, ""))
     z <- jsonlite::fromJSON(httr::content(result, as = "text", encoding = "utf-8"), flatten = TRUE)
@@ -14,7 +26,7 @@ get_filings <- function(company_number, key){
 }
 
 # check for availability of xbrl document
-has_xbrl <- function(metadata_url){
+has_xbrl <- function(metadata_url, key){
   auth <- paste0("Basic ", jsonlite::base64_enc(paste0(key, ":")))
   meta <- httr::GET(metadata_url, httr::add_headers(Authorization = auth))
   metaparsed <- jsonlite::fromJSON(httr::content(meta, as = "text", encoding = "utf-8"), flatten = TRUE)
